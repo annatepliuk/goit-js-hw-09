@@ -5,22 +5,23 @@ function saveToLS(key, value) {
 }
 
 
-function getFromLS(key, defaultValue) {
-  const jsonData = localStorage.getItem(key);
+function getFromLS(key) {
   try {
-    const data = JSON.parse(jsonData);
-    return data;
-  } catch {
-    return defaultValue || jsonData;
+    const jsonData = localStorage.getItem(key);
+    return jsonData ? JSON.parse(jsonData) : null;
+  } catch (error) {
+    console.error("Failed to parse data from localStorage:", error);
+    return null;
   }
 }
 
 const formEl = document.querySelector(".feedback-form");
 let formData =  { 
     email: "",
-    message: "" ,};
+    message: "" ,
+};
 
-// Перевірка на заповненість полів
+//Restore form data on load
 document.addEventListener("DOMContentLoaded", () => {
   try {
     const lsData = getFromLS("feedback-form-state");
@@ -35,21 +36,20 @@ document.addEventListener("DOMContentLoaded", () => {
   } catch (error) {
     console.error("Error restoring form data:", error);
   }
-}); 
+});
 
-// Відстеження введення (input) 
+//Save input to localStorage without losing existing data
 formEl.addEventListener("input", (e) => {
   try {
     const { name, value } = e.target;
-    formData[name] = value.trim();
-    saveToLS("feedback-form-state", formData);
+    formData[name] = value.trim(); 
+    saveToLS("feedback-form-state", formData); 
   } catch (error) {
     console.error("Error handling input event:", error);
   }
 });
 
-//Обробка відправлення форми 
-
+// Handle form submit 
 formEl.addEventListener("submit", (e) => {
   e.preventDefault();
 
@@ -61,7 +61,7 @@ formEl.addEventListener("submit", (e) => {
       return;
     }
 
-// Очищення
+    console.log(formData);
 
     localStorage.removeItem("feedback-form-state");
     formData = { email: "", message: "" };
